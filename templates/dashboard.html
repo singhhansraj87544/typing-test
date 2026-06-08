@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+
+    <style>
+        body{
+            margin:0;
+            font-family:Arial;
+            background:linear-gradient(135deg,#0f172a,#1e293b);
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .card{
+            background:#1e293b;
+            padding:40px;
+            border-radius:15px;
+            text-align:center;
+            width:350px;
+            box-shadow:0 0 20px rgba(0,0,0,0.4);
+        }
+
+        h1{
+            color:#38bdf8;
+        }
+
+        a{
+            display:inline-block;
+            margin-top:20px;
+            padding:10px 20px;
+            background:#38bdf8;
+            color:white;
+            text-decoration:none;
+            border-radius:8px;
+        }
+
+        a:hover{
+            background:#0ea5e9;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <h1>Welcome {{ user }}</h1>
+
+    <p>You have successfully logged in 🚀</p>
+
+    <a href="/">Go to Typing Test</a>
+
+    <br><br>
+
+    <a href="/logout">Logout</a>
+
+</div>
+
+</body>
+</html>

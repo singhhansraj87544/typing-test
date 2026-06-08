@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<title>Typing Speed Test</title>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+    {% if user %}
+        <a href="/logout">Logout</a>
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+ 
+
+<div class="container">
+
+<div class="left">
+ {% if user %}
+<div class="welcome-bar">
+    Welcome {{ user }}
+</div>
+{% endif %}
+<h1>Typing Speed Test</h1>
+
+
+<div class="paragraph" id="paragraph"></div>
+
+<div class="info">
+Press ENTER to Start Test
+</div>
+
+<textarea
+id="typingBox"
+placeholder="Press ENTER to Start..."
+disabled
+></textarea>
+
+<div id="finalResult">
+
+<h2>Test Completed</h2>
+
+<h3>Time: <span id="finalTime"></span></h3>
+
+<h3>Speed: <span id="finalSpeed"></span></h3>
+
+<h3>Accuracy: <span id="finalAccuracy"></span></h3>
+
+<button id="restartBtn" onclick="location.reload()">
+New Random Test
+</button>
+
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="card">
+<h2>Time</h2>
+<div class="value" id="time">0s</div>
+</div>
+
+<div class="card">
+<h2>Speed</h2>
+<div class="value" id="speed">0 WPM</div>
+</div>
+
+<div class="card">
+<h2>Accuracy</h2>
+<div class="value" id="accuracy">0%</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let startTime;
+let timerInterval;
+let started = false;
+let testfinished = false;
+
+const paragraph = `{{ paragraph }}`;
+
+const paragraphDiv =
+document.getElementById("paragraph");
+
+const originalWords =
+paragraph.trim().split(/\\s+/);
+
+paragraphDiv.innerHTML =
+paragraph.split("").map(char => {
+    return `<span class="char">${char}</span>`;
+}).join("");
+
+function startTest(){
+
+started = true;
+
+document.getElementById("typingBox").disabled = false;
+
+document.getElementById("typingBox").focus();
+
+startTime = new Date().getTime();
+
+timerInterval = setInterval(updateStats,100);
+}
+
+function updateStats(){
+
+let typedText =
+document.getElementById("typingBox").value;
+
+let currentTime =
+new Date().getTime();
+
+let timeTaken =
+(currentTime - startTime)/1000;
+document.getElementById("time").innerText =
+timeTaken.toFixed(1) + "s";
+
+let typedWords =
+typedText.trim().split(/\s+/);
+
+if(typedText.trim() == ""){
+typedWords = [];
+}
+    let correctChars = 0;
+
+    for(let i=0;i<typedText.length;i++){
+        if(typedText[i] === paragraph[i]){
+            correctChars++;
+        }
+    }
+
+let accuracy = 0;
+
+if(typedText.length > 0){
+
+    accuracy = Math.round(
+        (correctChars / typedText.length) * 100
+    );
+}
+document.getElementById("accuracy").innerText =
+    accuracy + "%";
+
+
+let wpm =
+(
+    ((correctChars / 5) / timeTaken) * 60
+);
+
+if(!isFinite(wpm)){
+    wpm = 0;
+}
+
+document.getElementById("speed").innerText =
+wpm.toFixed(2) + " WPM";
+
+let chars =
+document.querySelectorAll(".char");
+
+for(let i=0;i<chars.length;i++){
+
+    chars[i].classList.remove(
+        "correct-char",
+        "wrong-char",
+        "current-char"
+    );
+}
+
+for(let i=0;i<typedText.length;i++){
+
+    if(i >= chars.length) break;
+
+    if(typedText[i] === paragraph[i]){
+
+        chars[i].classList.add(
+            "correct-char"
+        );
+    }
+    else{
+
+        chars[i].classList.add(
+            "wrong-char"
+        );
+    }
+}
+
+if(typedText.length < chars.length){
+
+    chars[typedText.length]
+        .classList.add(
+            "current-char"
+        );
+}
+let correctWords = 0;
+
+for(let i=0;i<typedWords.length;i++){
+
+if(
+typedWords[i] === originalWords[i]
+){
+correctWords++;
+}
+}
+
+
+document.getElementById("accuracy").innerText =
+accuracy + "%";
+
+if(
+    typedText.length >= paragraph.length &&
+    typedText === paragraph
+){
+
+    clearInterval(timerInterval);
+
+    document.getElementById("typingBox").disabled = true;
+
+    document.getElementById("finalResult").style.display =
+    "block";
+
+    document.getElementById("finalTime").innerText =
+    document.getElementById("time").innerText;
+
+    document.getElementById("finalSpeed").innerText =
+    document.getElementById("speed").innerText;
+
+    document.getElementById("finalAccuracy").innerText =
+    document.getElementById("accuracy").innerText;
+
+    started = false;
+    testfinished = true;
+}
+}
+   
+
+
+document.addEventListener(
+"keydown",
+function(event){
+
+    if(event.key === "Enter"){
+
+        event.preventDefault();
+
+        if(testfinished){
+           window.location.href = "/change-paragraph";
+        }
+        else if(!started){
+            startTest();
+        }
+    }
+}
+);
+
+document.getElementById("typingBox").addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Enter"){
+            event.preventDefault();
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+
+

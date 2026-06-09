@@ -16,6 +16,28 @@ body{
 
 }
 
+#startBtn{
+    margin-top:20px;
+    padding:12px 30px;
+    font-size:18px;
+    font-weight:bold;
+    background:#38bdf8;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+#startBtn:hover{
+    background:#0ea5e9;
+    transform:scale(1.05);
+}
+
+#startBtn:active{
+    transform:scale(0.98);
+}
+
 .welcome-bar{
     
     top:15px;

@@ -57,6 +57,10 @@ placeholder="Press ENTER to Start..."
 disabled
 ></textarea>
 
+<button id="startBtn" onclick="startTest()">
+    Start Test
+</button>
+
 <div id="finalResult">
 
 <h2>Test Completed</h2>
@@ -118,15 +122,19 @@ paragraph.split("").map(char => {
 
 function startTest(){
 
-started = true;
+    if(started) return;
 
-document.getElementById("typingBox").disabled = false;
+    started = true;
 
-document.getElementById("typingBox").focus();
+    document.getElementById("startBtn").style.display = "none";
 
-startTime = new Date().getTime();
+    document.getElementById("typingBox").disabled = false;
 
-timerInterval = setInterval(updateStats,100);
+    document.getElementById("typingBox").focus();
+
+    startTime = new Date().getTime();
+
+    timerInterval = setInterval(updateStats, 100);
 }
 
 function updateStats(){

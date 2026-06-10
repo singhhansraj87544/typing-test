@@ -6,7 +6,2366 @@
 <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
+<title>Chek Your Speed - typing test</title>
+from flask import Flask, render_template_string
+import random
+
+app = Flask(__name__)
+
+# RANDOM ENGLISH PARAGRAPHS
+paragraphs = [
+
+"""Technology is changing the world very quickly and people are learning new digital skills every day. Programming languages such as Python and JavaScript are widely used in software development, automation, and artificial intelligence projects. Learning coding helps students improve their logical thinking and problem solving abilities.""",
+
+"""Typing speed is an important skill for students, programmers, writers, and office workers. Regular typing practice improves accuracy, speed, and finger coordination on the keyboard. Many professional typists can type more than one hundred words per minute with excellent accuracy and consistency.""",
+
+"""Artificial intelligence is becoming one of the most powerful technologies in modern times. AI systems are used in healthcare, education, transportation, gaming, and many online services. Companies use machine learning algorithms to analyze data and make smart decisions automatically.""",
+
+"""Cyber security is essential for protecting computers, mobile devices, and online accounts from hackers and malicious software. Strong passwords, two factor authentication, and updated antivirus software help users stay safe on the internet. People should avoid opening unknown links or downloading suspicious files.""",
+
+"""Web development is divided into frontend and backend development. Frontend developers design the user interface of websites using HTML, CSS, and JavaScript, while backend developers handle servers, databases, and application logic. Modern websites require both design and performance optimization.""",
+
+"""Gaming computers are designed to deliver high performance and smooth gameplay. Powerful processors, fast graphics cards, SSD storage, and efficient cooling systems are important for gaming setups. Many gamers also use mechanical keyboards and high refresh rate monitors for better gaming experiences.""",
+
+"""Cloud computing allows users to store files and run applications through the internet instead of relying only on local computers. Services like online storage, streaming platforms, and web applications depend on cloud infrastructure. Businesses use cloud systems because they are flexible and scalable.""",
+
+"""Python is considered one of the best programming languages for beginners because its syntax is simple and easy to understand. Developers use Python for web development, automation, data analysis, artificial intelligence, and game development. Many schools and universities teach Python to students.""",
+
+"""The internet has completely transformed communication and access to information. People can learn new skills, watch educational videos, attend online classes, and communicate with others around the world instantly. Digital technology continues to create new opportunities for businesses and students.""",
+
+"""Typing practice games are useful for improving keyboard speed and reducing mistakes while typing. Professional typing websites provide live speed tracking, accuracy monitoring, and timed challenges. Daily practice can significantly improve typing performance over time."""
+]
+
+html = """
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Professional Typing Test</title>
+
+    <style>
+
+        body{
+            margin:0;
+            padding:0;
+            font-family:Arial;
+            background:#0f172a;
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+        }
+
+        .container{
+            width:1100px;
+            display:flex;
+            gap:20px;
+            align-items:flex-start;
+        }
+
+        .left{
+            flex:3;
+            background:#1e293b;
+            padding:30px;
+            border-radius:15px;
+        }
+
+        .right{
+            flex:1;
+            background:#1e293b;
+            padding:20px;
+            border-radius:15px;
+            display:flex;
+            flex-direction:column;
+            gap:20px;
+        }
+
+        h1{
+            text-align:center;
+            color:#38bdf8;
+        }
+
+        .paragraph{
+            background:#334155;
+            padding:20px;
+            border-radius:10px;
+            font-size:22px;
+            line-height:42px;
+            margin-top:20px;
+        }
+
+        textarea{
+            width:100%;
+            height:180px;
+            margin-top:20px;
+            border:none;
+            border-radius:10px;
+            padding:15px;
+            font-size:20px;
+            resize:none;
+            outline:none;
+            box-sizing:border-box;
+        }
+
+        .info{
+            margin-top:10px;
+            text-align:center;
+            color:#94a3b8;
+        }
+
+        .card{
+            background:#334155;
+            padding:20px;
+            border-radius:12px;
+            text-align:center;
+        }
+
+        .card h2{
+            margin:0;
+            font-size:20px;
+            color:#38bdf8;
+        }
+
+        .value{
+            margin-top:10px;
+            font-size:35px;
+            font-weight:bold;
+        }
+
+        #finalResult{
+            display:none;
+            margin-top:20px;
+            background:#16a34a;
+            padding:20px;
+            border-radius:15px;
+            text-align:center;
+        }
+
+        #restartBtn{
+            margin-top:20px;
+            padding:12px 25px;
+            border:none;
+            border-radius:10px;
+            background:#0f172a;
+            color:white;
+            font-size:18px;
+            cursor:pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="left">
+
+        <h1>Typing Speed Test</h1>
+
+        <div class="paragraph">
+            {{ paragraph }}
+        </div>
+
+        <div class="info">
+            Press ENTER to Start Test
+        </div>
+
+        <textarea
+            id="typingBox"
+            placeholder="Press ENTER to Start..."
+            disabled
+        ></textarea>
+
+        <div id="finalResult">
+
+            <h2>🎉 Test Completed</h2>
+
+            <h3>⏱ Time: <span id="finalTime"></span></h3>
+
+            <h3>⚡ Speed: <span id="finalSpeed"></span></h3>
+
+            <h3>🎯 Accuracy: <span id="finalAccuracy"></span></h3>
+
+            <button id="restartBtn" onclick="location.reload()">
+                New Random Test
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="right">
+
+        <div class="card">
+            <h2>Time</h2>
+            <div class="value" id="time">0s</div>
+        </div>
+
+        <div class="card">
+            <h2>Speed</h2>
+            <div class="value" id="speed">0 WPM</div>
+        </div>
+
+        <div class="card">
+            <h2>Accuracy</h2>
+            <div class="value" id="accuracy">0%</div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+let startTime;
+let timerInterval;
+let started = false;
+
+const paragraph = {{ paragraph }};
+
+function startTest(){
+
+    started = true;
+
+    document.getElementById("typingBox").disabled = false;
+
+    document.getElementById("typingBox").focus();
+
+    startTime = new Date().getTime();
+
+    timerInterval = setInterval(updateStats, 100);
+}
+
+function updateStats(){
+
+    let typedText =
+        document.getElementById("typingBox").value;
+
+    let currentTime = new Date().getTime();
+
+    let timeTaken =
+        (currentTime - startTime) / 1000;
+
+    // TIME
+    document.getElementById("time").innerText =
+        timeTaken.toFixed(1) + "s";
+
+    // WORDS
+    let typedWords =
+        typedText.trim().split(/\\s+/);
+
+    let originalWords =
+        paragraph.trim().split(/\\s+/);
+
+    if(typedText.trim() == ""){
+        typedWords = [];
+    }
+
+    // SPEED
+    let words = typedWords.length;
+
+    let wpm =
+        Math.round((words / timeTaken) * 60);
+
+    if(!isFinite(wpm)){
+        wpm = 0;
+    }
+
+    document.getElementById("speed").innerText =
+        wpm + " WPM";
+
+    // ACCURACY
+    let correctWords = 0;
+
+    for(let i = 0; i < typedWords.length; i++){
+
+        if(typedWords[i] === originalWords[i]){
+            correctWords++;
+        }
+    }
+
+    let accuracy = 0;
+
+    if(typedWords.length > 0){
+
+        accuracy = Math.round(
+            (correctWords / typedWords.length) * 100
+        );
+    }
+
+    document.getElementById("accuracy").innerText =
+        accuracy + "%";
+
+    // AUTO STOP ONLY AFTER LAST WORD COMPLETE
+
+    let lastTypedWord =
+        typedWords[typedWords.length - 1];
+
+    let lastOriginalWord =
+        originalWords[originalWords.length - 1];
+
+    if(
+        typedWords.length >= originalWords.length
+        &&
+        lastTypedWord === lastOriginalWord
+    ){
+
+        clearInterval(timerInterval);
+
+        document.getElementById("typingBox").disabled = true;
+
+        document.getElementById("finalResult").style.display =
+            "block";
+
+        document.getElementById("finalTime").innerText =
+            document.getElementById("time").innerText;
+
+        document.getElementById("finalSpeed").innerText =
+            document.getElementById("speed").innerText;
+
+        document.getElementById("finalAccuracy").innerText =
+            document.getElementById("accuracy").innerText;
+    }
+}
+
+document.addEventListener("keydown", function(event){
+
+    if(event.key === "Enter" && !started){
+
+        event.preventDefault();
+
+        startTest();
+    }
+});
+
+</script>
+
+</body>
+</html>
+
+"""
+
+@app.route("/")
+def home():
+
+    paragraph = random.choice(paragraphs)
+
+    return render_template_string(
+        html,
+        paragraph=paragraph
+    )
+
+if __name__ == "__main__":
+    app.run(debug=True) is code ko aisa kar do ki sahi word type karne par green or galat word type karne par red highlight ho
+full code do
+bhai tu hi likh kar dede pura code me bahut confuse hu
+to do bar me bhej do ek bar me aadha or dusri baar me aadha
+part 2
+css formating kese karu
+par word pure type karne se pehle hi red highlight ho raha hai or pura word highlight ho raha ise aisa karo ki charactor wise highlight ho
+kon sa code hatana hai js me
+isse to aadhi screen show ho rahi hai
+koi error nahi hai shayad css me mistake hai
+pura page hi aadha dikh raha hai
+paragraph ek sine me dikh raha hai
+par speed kam dikha raha hai
+wpm decimal me aani chahiye
+let wpm =
+Math.round(
+    ((correctChars / 5) / timeTaken) * 60
+);
+
+if(!isFinite(wpm)){
+wpm = 0;
+}
+
+document.getElementById("speed").innerText =
+wpm + " WPM";  ye code hai
+kya me is game se paise kama sakta hu
+to kar do
+kar do add ye features
+step 1 add karo
+from flask import Flask, render_template_string
+import random
+
+app = Flask(__name__)
+
+paragraphs = [
+
+"""Technology is changing the world very quickly and people are learning new digital skills every day. Programming languages such as Python and JavaScript are widely used in software development, automation, and artificial intelligence projects. Learning coding helps students improve their logical thinking and problem solving abilities.""",
+
+"""Typing speed is an important skill for students, programmers, writers, and office workers. Regular typing practice improves accuracy, speed, and finger coordination on the keyboard. Many professional typists can type more than one hundred words per minute with excellent accuracy and consistency.""",
+
+"""Artificial intelligence is becoming one of the most powerful technologies in modern times. AI systems are used in healthcare, education, transportation, gaming, and many online services. Companies use machine learning algorithms to analyze data and make smart decisions automatically.""",
+
+"""Cyber security is essential for protecting computers, mobile devices, and online accounts from hackers and malicious software. Strong passwords, two factor authentication, and updated antivirus software help users stay safe on the internet. People should avoid opening unknown links or downloading suspicious files.""",
+
+"""Web development is divided into frontend and backend development. Frontend developers design the user interface of websites using HTML, CSS, and JavaScript, while backend developers handle servers, databases, and application logic. Modern websites require both design and performance optimization.""",
+
+"""Gaming computers are designed to deliver high performance and smooth gameplay. Powerful processors, fast graphics cards, SSD storage, and efficient cooling systems are important for gaming setups. Many gamers also use mechanical keyboards and high refresh rate monitors for better gaming experiences."""
+]
+
+html = """
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
 <title>Typing Speed Test</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial;
+    background:#0f172a;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    margin:0;
+    padding:20px;
+    box-sizing:border-box;
+    overflow-x:hidden;
+
+}
+
+.container{
+    width:1100px;
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+}
+
+.left{
+    flex:3;
+    background:#1e293b;
+    padding:30px;
+    border-radius:15px;
+}
+
+.right{
+    flex:1;
+    background:#1e293b;
+    padding:20px;
+    border-radius:15px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+h1{
+    text-align:center;
+    color:#38bdf8;
+}
+
+.paragraph{
+    background:#334155;
+    padding:20px;
+    border-radius:10px;
+    font-size:22px;
+    line-height:42px;
+    margin-top:20px;
+
+    white-space:normal;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+}
+
+.word{
+    padding:2px 4px;
+    border-radius:4px;
+}
+
+.correct{
+    color:#22c55e;
+    background:rgba(34,197,94,.15);
+}
+
+.wrong{
+    color:#ef4444;
+    background:rgba(239,68,68,.15);
+}
+
+.current{
+    background:#38bdf8;
+    color:white;
+}
+
+textarea{
+    width:100%;
+    height:180px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    padding:15px;
+    font-size:20px;
+    resize:none;
+    outline:none;
+    box-sizing:border-box;
+}
+
+.info{
+    margin-top:10px;
+    text-align:center;
+    color:#94a3b8;
+}
+
+.card{
+    background:#334155;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+}
+
+.card h2{
+    margin:0;
+    font-size:20px;
+    color:#38bdf8;
+}
+
+.value{
+    margin-top:10px;
+    font-size:35px;
+    font-weight:bold;
+}
+
+#finalResult{
+    display:none;
+    margin-top:20px;
+    background:#16a34a;
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+}
+
+#restartBtn{
+    margin-top:20px;
+    padding:12px 25px;
+    border:none;
+    border-radius:10px;
+    background:#0f172a;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.char{
+    font-size:22px;
+    border-radius:3px;
+    display:inline;
+}
+
+.correct-char{
+    color:#22c55e;
+}
+
+.wrong-char{
+    color:#ef4444;
+    background:rgba(239,68,68,.15);
+}
+
+.char{
+    font-size:22px;
+    border-radius:3px;
+}
+
+.correct-char{
+    color:#22c55e;
+}
+
+.wrong-char{
+    color:#ef4444;
+    background:rgba(239,68,68,.15);
+}
+
+.char{
+    font-size:22px;
+    border-radius:3px;
+}
+
+.correct-char{
+    color:#22c55e;
+}
+
+.wrong-char{
+    color:#ef4444;
+    background:rgba(239,68,68,.15);
+}
+
+.char{
+    font-size:22px;
+    border-radius:3px;
+}
+
+.correct-char{
+    color:#22c55e;
+}
+
+.wrong-char{
+    color:#ef4444;
+    background:rgba(239,68,68,.15);
+}
+
+.current-char{
+    background:#38bdf8;
+    color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left">
+
+<h1>Typing Speed Test</h1>
+
+<div class="paragraph" id="paragraph"></div>
+
+<div class="info">
+Press ENTER to Start Test
+</div>
+
+<textarea
+id="typingBox"
+placeholder="Press ENTER to Start..."
+disabled
+></textarea>
+
+<div id="finalResult">
+
+<h2>Test Completed</h2>
+
+<h3>Time: <span id="finalTime"></span></h3>
+
+<h3>Speed: <span id="finalSpeed"></span></h3>
+
+<h3>Accuracy: <span id="finalAccuracy"></span></h3>
+
+<button id="restartBtn" onclick="location.reload()">
+New Random Test
+</button>
+
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="card">
+<h2>Time</h2>
+<div class="value" id="time">0s</div>
+</div>
+
+<div class="card">
+<h2>Speed</h2>
+<div class="value" id="speed">0 WPM</div>
+</div>
+
+<div class="card">
+<h2>Accuracy</h2>
+<div class="value" id="accuracy">0%</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let startTime;
+let timerInterval;
+let started = false;
+
+const paragraph = {{ paragraph }};
+
+const paragraphDiv =
+document.getElementById("paragraph");
+
+const originalWords =
+paragraph.trim().split(/\\s+/);
+
+paragraphDiv.innerHTML =
+paragraph.split("").map(char => {
+    return <span class="char">${char}</span>;
+}).join("");
+
+function startTest(){
+
+started = true;
+
+document.getElementById("typingBox").disabled = false;
+
+document.getElementById("typingBox").focus();
+
+startTime = new Date().getTime();
+
+timerInterval = setInterval(updateStats,100);
+}
+
+function updateStats(){
+
+let typedText =
+document.getElementById("typingBox").value;
+
+let currentTime =
+new Date().getTime();
+
+let timeTaken =
+(currentTime - startTime)/1000;
+document.getElementById("time").innerText =
+timeTaken.toFixed(1) + "s";
+
+let typedWords =
+typedText.trim().split(/\s+/);
+
+if(typedText.trim() == ""){
+typedWords = [];
+}
+
+let correctChars = 0;
+
+for(let i=0;i<typedText.length;i++){
+    if(typedText[i] === paragraph[i]){
+        correctChars++;
+    }
+}
+
+let wpm =
+(
+    ((correctChars / 5) / timeTaken) * 60
+);
+
+if(!isFinite(wpm)){
+    wpm = 0;
+}
+
+document.getElementById("speed").innerText =
+wpm.toFixed(2) + " WPM";
+
+let chars =
+document.querySelectorAll(".char");
+
+for(let i=0;i<chars.length;i++){
+
+    chars[i].classList.remove(
+        "correct-char",
+        "wrong-char",
+        "current-char"
+    );
+}
+
+for(let i=0;i<typedText.length;i++){
+
+    if(i >= chars.length) break;
+
+    if(typedText[i] === paragraph[i]){
+
+        chars[i].classList.add(
+            "correct-char"
+        );
+    }
+    else{
+
+        chars[i].classList.add(
+            "wrong-char"
+        );
+    }
+}
+
+if(typedText.length < chars.length){
+
+    chars[typedText.length]
+        .classList.add(
+            "current-char"
+        );
+}
+let correctWords = 0;
+
+for(let i=0;i<typedWords.length;i++){
+
+if(
+typedWords[i] === originalWords[i]
+){
+correctWords++;
+}
+}
+
+let accuracy = 0;
+
+if(typedWords.length > 0){
+
+accuracy = Math.round(
+(correctWords / typedWords.length) * 100
+);
+}
+
+document.getElementById("accuracy").innerText =
+accuracy + "%";
+
+let lastTypedWord =
+typedWords[typedWords.length - 1];
+
+let lastOriginalWord =
+originalWords[originalWords.length - 1];
+
+if(
+typedWords.length >= originalWords.length
+&&
+lastTypedWord === lastOriginalWord
+){
+
+clearInterval(timerInterval);
+
+document.getElementById("typingBox").disabled = true;
+
+document.getElementById("finalResult").style.display =
+"block";
+
+document.getElementById("finalTime").innerText =
+document.getElementById("time").innerText;
+
+document.getElementById("finalSpeed").innerText =
+document.getElementById("speed").innerText;
+
+document.getElementById("finalAccuracy").innerText =
+document.getElementById("accuracy").innerText;
+}
+}
+
+document.addEventListener(
+"keydown",
+function(event){
+
+if(
+event.key === "Enter"
+&&
+!started
+){
+
+event.preventDefault();
+
+startTest();
+}
+}
+);
+
+</script>
+
+</body>
+</html>
+
+"""
+
+@app.route("/")
+def home():
+
+    paragraph = random.choice(paragraphs)
+
+    return render_template_string(
+        html,
+        paragraph=paragraph
+    )
+
+if __name__ == "__main__":
+    app.run(debug=True) ye hai sara code
+3 file me kese devide karu
+samajh nahi aaya
+templates kya hai
+kya is naam se folder banana padega
+ab ye batao kis file me kya aayega pura code or inhe ek dusre se link kese karu
+pura code bata kisme kya likhna hai
+html me accuracy par error aa raha hai
+nahi accuracy ke ceeche red line aa rahi hai
+javascript me accuracy ke neeche red line aa rahi hai
+function updateStats(){
+
+let typedText =
+document.getElementById("typingBox").value;
+
+let currentTime =
+new Date().getTime();
+
+let timeTaken =
+(currentTime - startTime)/1000;
+document.getElementById("time").innerText =
+timeTaken.toFixed(1) + "s";
+
+let typedWords =
+typedText.trim().split(/\s+/);
+
+if(typedText.trim() == ""){
+typedWords = [];
+}
+
+let accuracy = 0;
+
+if(typedText.length > 0){
+
+    accuracy = Math.round(
+        (correctChars / typedText.length) * 100
+    );
+}
+
+let wpm =
+(
+    ((correctChars / 5) / timeTaken) * 60
+); ye hai mera code
+function updateStats(){
+
+let typedText =
+document.getElementById("typingBox").value;
+
+let currentTime =
+new Date().getTime();
+
+let timeTaken =
+(currentTime - startTime)/1000;
+document.getElementById("time").innerText =
+timeTaken.toFixed(1) + "s";
+
+let typedWords =
+typedText.trim().split(/\s+/);
+
+if(typedText.trim() == ""){
+typedWords = [];
+}
+
+let accuracy = 0;
+
+if(typedText.length > 0){
+
+    accuracy = Math.round(
+        (correctChars / typedText.length) * 100
+    );
+}
+
+let wpm =
+(
+    ((correctChars / 5) / timeTaken) * 60
+); ye hai mera code
+ye error hai Cannot redeclare block-scoped variable 'accuracy'.javascript
+html = """
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Typing Speed Test</title>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left">
+
+<h1>Typing Speed Test</h1>
+
+<div class="paragraph" id="paragraph"></div>
+
+<div class="info">
+Press ENTER to Start Test
+</div>
+
+<textarea
+id="typingBox"
+placeholder="Press ENTER to Start..."
+disabled
+></textarea>
+
+<div id="finalResult">
+
+<h2>Test Completed</h2>
+
+<h3>Time: <span id="finalTime"></span></h3>
+
+<h3>Speed: <span id="finalSpeed"></span></h3>
+
+<h3>Accuracy: <span id="finalAccuracy"></span></h3>
+
+<button id="restartBtn" onclick="location.reload()">
+New Random Test
+</button>
+
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="card">
+<h2>Time</h2>
+<div class="value" id="time">0s</div>
+</div>
+
+<div class="card">
+<h2>Speed</h2>
+<div class="value" id="speed">0 WPM</div>
+</div>
+
+<div class="card">
+<h2>Accuracy</h2>
+<div class="value" id="accuracy">0%</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let startTime;
+let timerInterval;
+let started = false;
+
+const paragraph = {{ paragraph }};
+
+const paragraphDiv =
+document.getElementById("paragraph");
+
+const originalWords =
+paragraph.trim().split(/\\s+/);
+
+paragraphDiv.innerHTML =
+paragraph.split("").map(char => {
+    return <span class="char">${char}</span>;
+}).join("");
+
+function startTest(){
+
+started = true;
+
+document.getElementById("typingBox").disabled = false;
+
+document.getElementById("typingBox").focus();
+
+startTime = new Date().getTime();
+
+timerInterval = setInterval(updateStats,100);
+}
+
+function updateStats(){
+
+let typedText =
+document.getElementById("typingBox").value;
+
+let currentTime =
+new Date().getTime();
+
+let timeTaken =
+(currentTime - startTime)/1000;
+document.getElementById("time").innerText =
+timeTaken.toFixed(1) + "s";
+
+let typedWords =
+typedText.trim().split(/\s+/);
+
+if(typedText.trim() == ""){
+typedWords = [];
+}
+    let correctChars = 0;
+
+    for(let i=0;i<typedText.length;i++){
+        if(typedText[i] === paragraph[i]){
+            correctChars++;
+        }
+    }
+
+let accuracy = 0;
+
+if(typedText.length > 0){
+
+    accuracy = Math.round(
+        (correctChars / typedText.length) * 100
+    );
+}
+document.getElementById("accuracy").innerText =
+    accuracy + "%";
+
+
+let wpm =
+(
+    ((correctChars / 5) / timeTaken) * 60
+);
+
+if(!isFinite(wpm)){
+    wpm = 0;
+}
+
+document.getElementById("speed").innerText =
+wpm.toFixed(2) + " WPM";
+
+let chars =
+document.querySelectorAll(".char");
+
+for(let i=0;i<chars.length;i++){
+
+    chars[i].classList.remove(
+        "correct-char",
+        "wrong-char",
+        "current-char"
+    );
+}
+
+for(let i=0;i<typedText.length;i++){
+
+    if(i >= chars.length) break;
+
+    if(typedText[i] === paragraph[i]){
+
+        chars[i].classList.add(
+            "correct-char"
+        );
+    }
+    else{
+
+        chars[i].classList.add(
+            "wrong-char"
+        );
+    }
+}
+
+if(typedText.length < chars.length){
+
+    chars[typedText.length]
+        .classList.add(
+            "current-char"
+        );
+}
+let correctWords = 0;
+
+for(let i=0;i<typedWords.length;i++){
+
+if(
+typedWords[i] === originalWords[i]
+){
+correctWords++;
+}
+}
+
+
+
+if(typedWords.length > 0){
+
+accuracy = Math.round(
+(correctWords / typedWords.length) * 100
+);
+}
+
+document.getElementById("accuracy").innerText =
+accuracy + "%";
+
+let lastTypedWord =
+typedWords[typedWords.length - 1];
+
+let lastOriginalWord =
+originalWords[originalWords.length - 1];
+
+if(
+typedWords.length >= originalWords.length
+&&
+lastTypedWord === lastOriginalWord
+){
+
+clearInterval(timerInterval);
+
+document.getElementById("typingBox").disabled = true;
+
+document.getElementById("finalResult").style.display =
+"block";
+
+document.getElementById("finalTime").innerText =
+document.getElementById("time").innerText;
+
+document.getElementById("finalSpeed").innerText =
+document.getElementById("speed").innerText;
+
+document.getElementById("finalAccuracy").innerText =
+document.getElementById("accuracy").innerText;
+}
+}
+
+document.addEventListener(
+"keydown",
+function(event){
+
+if(
+event.key === "Enter"
+&&
+!started
+){
+
+event.preventDefault();
+
+startTest();
+}
+}
+);
+
+</script>
+
+</body>
+</html>
+
+"""  kya ab sahi hai
+from flask import Flask, render_template_string
+import random
+
+app = Flask(__name__)
+
+paragraphs = [
+
+"""Technology is changing the world very quickly and people are learning new digital skills every day. Programming languages such as Python and JavaScript are widely used in software development, automation, and artificial intelligence projects. Learning coding helps students improve their logical thinking and problem solving abilities.""",
+
+"""Typing speed is an important skill for students, programmers, writers, and office workers. Regular typing practice improves accuracy, speed, and finger coordination on the keyboard. Many professional typists can type more than one hundred words per minute with excellent accuracy and consistency.""",
+
+"""Artificial intelligence is becoming one of the most powerful technologies in modern times. AI systems are used in healthcare, education, transportation, gaming, and many online services. Companies use machine learning algorithms to analyze data and make smart decisions automatically.""",
+
+"""Cyber security is essential for protecting computers, mobile devices, and online accounts from hackers and malicious software. Strong passwords, two factor authentication, and updated antivirus software help users stay safe on the internet. People should avoid opening unknown links or downloading suspicious files.""",
+
+"""Web development is divided into frontend and backend development. Frontend developers design the user interface of websites using HTML, CSS, and JavaScript, while backend developers handle servers, databases, and application logic. Modern websites require both design and performance optimization.""",
+
+"""Gaming computers are designed to deliver high performance and smooth gameplay. Powerful processors, fast graphics cards, SSD storage, and efficient cooling systems are important for gaming setups. Many gamers also use mechanical keyboards and high refresh rate monitors for better gaming experiences."""
+]
+
+
+@app.route("/")
+def home():
+
+    paragraph = random.choice(paragraphs)
+
+    return render_template_string(
+        html,
+        paragraph=paragraph
+    )
+
+if __name__ == "__main__":
+    app.run(debug=True) kya ye code sahi hai
+@app.route("/")
+def home():
+
+    paragraph = random.choice(paragraphs)
+
+    return render_template("index.html", paragraph=paragraph)
+
+if __name__ == "__main__":
+    app.run(debug=True) kya ab theek hai
+isme render_template ke neeche red line aa rahi hai
+ab in teeno ke link kese karu
+par ab ye code run karne par error aa raha hai
+folder template naam se banana hai ya templates naam se
+Ha run ho gaya ab isme login wala system kar do
+ise aisa karo ki login ke bina bhi open ho jaye or login karne par bhi
+ye hai ab
+@app.route("/")
+def home():
+   
+
+    paragraph = random.choice(paragraphs)
+    return render_template("index.html", paragraph=paragraph, user=session["user"])
+
+
+if __name__ == "__main__":
+    app.run(debug=True) ye
+par login hoga kese koi button to hai hi nahi
+ye kaha add karna hai
+python wala kaha add karna hai
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect("/") ye code kaha dalna hai
+from flask import Flask, render_template, request, redirect, session, url_for
+import sqlite3
+import random
+
+app = Flask(__name__)
+app.secret_key = "secret123"
+
+paragraphs = [
+    "Technology is changing the world very quickly.",
+    "Typing speed improves with practice.",
+    "Python is a powerful programming language."
+]
+
+# ---------------- DATABASE ----------------
+def init_db():
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# ---------------- REGISTER ----------------
+@app.route("/register", methods=["GET","POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        try:
+            c.execute("INSERT INTO users(username,password) VALUES(?,?)",
+                      (username,password))
+            conn.commit()
+        except:
+            return "User already exists!"
+
+        conn.close()
+        return redirect("/login")
+
+    return render_template("register.html")
+
+
+# ---------------- LOGIN ----------------
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM users WHERE username=? AND password=?",
+                  (username,password))
+
+        user = c.fetchone()
+        conn.close()
+
+        if user:
+            session["user"] = username
+            return redirect("/")
+        else:
+            return "Invalid credentials"
+
+    return render_template("login.html")
+
+
+# ---------------- LOGOUT ----------------
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect("/login")
+
+
+# ---------------- HOME ----------------
+@app.route("/")
+def home():
+
+    paragraph = random.choice(paragraphs)
+
+    user = session.get("user")  # SAFE method
+
+    return render_template("index.html", paragraph=paragraph, user=user)
+
+
+if __name__ == "__main__":
+    app.run(debug=True) kya ye code sahi hai
+login or register ke button ko upar karo
+side se hata do or jo upar button hai lohin or register ka use middle me karo
+side se login or register ke button bhi hata do
+side wale button to ab bhi nahi hate
+login button par click karte hi bekar sa page aata hai ise good looking kar do
+login par click karne ke baad wala page change karna hai
+option 2
+return redirect("/dashboard") ye kaha likhna hai
+jaha username or password dalte hai us page ko achha bana do
+register page ko bhi aisa hi bana do
+ise google ya email id se login karne wala bana do
+username or password se register karne par kon sa username or password dalna padega
+login karne par Invalid credentials likha aa raha hai
+pehle isme password change karne ka option do
+par login to ho hi nahi raha
+login par click karte hi change password ka option aa raha hai
+username or password dalne ke baad!
+login par click karne par username or password dalne ka option aa raha hai fir ye dal kar login karne par change password page open ho raha hai
+def dashboard():
+
+    if "user" not in session:
+        return redirect("/login")
+
+    return render_template("dashboard.html", user=session["user"])
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+
+    <style>
+        body{
+            margin:0;
+            font-family:Arial;
+            background:linear-gradient(135deg,#0f172a,#1e293b);
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .card{
+            background:#1e293b;
+            padding:40px;
+            border-radius:15px;
+            text-align:center;
+            width:350px;
+            box-shadow:0 0 20px rgba(0,0,0,0.4);
+        }
+
+        h1{
+            color:#38bdf8;
+        }
+
+        a{
+            display:inline-block;
+            margin-top:20px;
+            padding:10px 20px;
+            background:#38bdf8;
+            color:white;
+            text-decoration:none;
+            border-radius:8px;
+        }
+
+        a:hover{
+            background:#0ea5e9;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <h1>Welcome {{ user }}</h1>
+
+    <p>You have successfully logged in 🚀</p>
+
+    <a href="/">Go to Typing Test</a>
+
+    <br><br>
+
+    <a href="/logout">Logout</a>
+
+</div>
+
+</body>
+</html>
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM users WHERE username=? AND password=?",
+                  (username,password))
+
+        user = c.fetchone()
+        conn.close()
+
+        if user:
+            session["user"] = username
+            return redirect("/dashboard")
+        else:
+            return "Invalid credentials"
+
+    return render_template("login.html")
+
+from flask import Flask, render_template, request, redirect, session, url_for
+import sqlite3
+import random
+
+app = Flask(__name__)
+app.secret_key = "secret123"
+
+paragraphs = [
+    "Technology is changing the world very quickly.",
+    "Typing speed improves with practice.",
+    "Python is a powerful programming language."
+]
+
+# ---------------- DATABASE ----------------
+def init_db():
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# ---------------- REGISTER ----------------
+@app.route("/register", methods=["GET","POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        try:
+            c.execute("INSERT INTO users(username,password) VALUES(?,?)",
+                      (username,password))
+            conn.commit()
+        except:
+            return "User already exists!"
+
+        conn.close()
+        return redirect("/login")
+
+    return render_template("register.html")
+    print("Registered:", username, password)
+
+@app.route("/dashboard")
+
+@app.route("/change-password", methods=["GET", "POST"])
+def change_password():
+
+    if "user" not in session:
+        return redirect("/login")
+
+    if request.method == "POST":
+
+        old_password = request.form["old_password"]
+        new_password = request.form["new_password"]
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        c.execute(
+            "SELECT * FROM users WHERE username=? AND password=?",
+            (session["user"], old_password)
+        )
+
+        user = c.fetchone()
+
+        if not user:
+            conn.close()
+            return "Old password is incorrect!"
+
+        c.execute(
+            "UPDATE users SET password=? WHERE username=?",
+            (new_password, session["user"])
+        )
+
+        conn.commit()
+        conn.close()
+
+        return "Password changed successfully!"
+
+    return render_template("change_password.html")
+
+# -------------------dashboard-----------------
+@app.route("/dashboard")
+def dashboard():
+    return "Dashboard route working"
+
+    if "user" not in session:
+        return redirect("/login")
+
+    return render_template("dashboard.html", user=session["user"])
+
+# ---------------- LOGIN ----------------
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+
+        c.execute("SELECT * FROM users WHERE username=? AND password=?",
+                  (username,password))
+
+        user = c.fetchone()
+        conn.close()
+
+        if user:
+            session["user"] = username
+            return redirect("/dashboard")
+        else:
+            return "Invalid credentials"
+
+    return render_template("login.html")
+
+
+# ---------------- LOGOUT ----------------
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect("/login")
+
+
+# ---------------- HOME ----------------
+@app.route("/")
+def home():
+
+    paragraph = random.choice(paragraphs)
+
+    user = session.get("user")  # SAFE method
+
+    return render_template("index.html", paragraph=paragraph, user=user)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+not found likha aa raha hai
+ha terminal me 404 likha aa raha hai
+127.0.0.1 - - [01/Jun/2026] "GET /dashboard HTTP/1.1" 404 - ye aa raha hai
+ha bhai welcome likha aa gaya 
+par typing page par welcome logut side me likha aa raha hai ise upar center me kar do or keval welcome or user ka nam likha aana chahiye
+</div>
+
+    {% if user %}
+    <h3>Welcome {{ user }}</h3>
+    <a href="/logout">Logout</a>
+{% else %}
+    
+{% endif %} ye hai
+par ye ab bhi side me hai
+body{
+    margin:0;
+    padding:0;
+    padding-top:70px;
+    font-family:Arial;
+    background:#0f172a;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    margin:0;
+    padding:20px;
+    box-sizing:border-box;
+    overflow-x:hidden;
+
+}
+
+.welcome-bar{
+    
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    color:#38bdf8;
+    margin-bottom:600px;
+}
+upar ek logout button bhi hai usse neeche karo
+typing test ke pass welcome..... ko dikhana hai
+abe tarr typing test ke upar or logut button ke beech me aan achahiye
+logut button upar aana chahiye😡
+bata
+par typing test to stop hi nahi ho raha paragraph type karne ke bad
+ab enter dabate hi test khatam ho raha hai
+ise kaha likhu
+kaha lagana hai ye
+if(
+if(typedText........... kaha lagana hai
+function updateStats(){
+
+let typedText =
+document.getElementById("typingBox").value;
+
+let currentTime =
+new Date().getTime();
+
+let timeTaken =
+(currentTime - startTime)/1000;
+document.getElementById("time").innerText =
+timeTaken.toFixed(1) + "s";
+
+let typedWords =
+typedText.trim().split(/\s+/);
+
+if(typedText.trim() == ""){
+typedWords = [];
+} ye hai
+ let correctChars = 0;
+
+    for(let i=0;i<typedText.length;i++){
+        if(typedText[i] === paragraph[i]){
+            correctChars++;
+        }
+    }
+
+let accuracy = 0;
+
+if(typedText.length > 0){
+
+    accuracy = Math.round(
+        (correctChars / typedText.length) * 100
+    );
+}
+document.getElementById("accuracy").innerText =
+    accuracy + "%";
+
+
+let wpm =
+(
+    ((correctChars / 5) / timeTaken) * 60
+);
+
+if(!isFinite(wpm)){
+    wpm = 0;
+}
+
+document.getElementById("speed").innerText =
+wpm.toFixed(2) + " WPM";
+
+let chars =
+document.querySelectorAll(".char");
+
+for(let i=0;i<chars.length;i++){
+
+    chars[i].classList.remove(
+        "correct-char",
+        "wrong-char",
+        "current-char"
+    );
+}
+
+for(let i=0;i<typedText.length;i++){
+
+    if(i >= chars.length) break;
+
+    if(typedText[i] === paragraph[i]){
+
+        chars[i].classList.add(
+            "correct-char"
+        );
+    }
+    else{
+
+        chars[i].classList.add(
+            "wrong-char"
+        );
+    }
+}
+
+if(typedText.length < chars.length){
+
+    chars[typedText.length]
+        .classList.add(
+            "current-char"
+        );
+}
+let correctWords = 0;
+
+for(let i=0;i<typedWords.length;i++){
+
+if(
+typedWords[i] === originalWords[i]
+){
+correctWords++;
+}
+}
+
+
+document.getElementById("accuracy").innerText =
+accuracy + "%";
+
+if(
+    typedText.trim() === paragraph.length &&
+    typedText === paragraph
+){
+    clearInterval(timerInterval);
+
+    document.getElementById("typingBox").disabled = true;
+
+    document.getElementById("finalResult").style.display =
+    "block";
+
+    document.getElementById("finalTime").innerText =
+    document.getElementById("time").innerText;
+
+    document.getElementById("finalSpeed").innerText =
+    document.getElementById("speed").innerText;
+
+    document.getElementById("finalAccuracy").innerText =
+    document.getElementById("accuracy").innerText;
+}{
+if(
+    typedText.length >= paragraph.length &&
+    typedText === paragraph
+){
+    clearInterval(timerInterval);
+
+    document.getElementById("typingBox").disabled = true;
+
+    document.getElementById("finalResult").style.display =
+    "block";
+
+    document.getElementById("finalTime").innerText =
+    document.getElementById("time").innerText;
+
+    document.getElementById("finalSpeed").innerText =
+    document.getElementById("speed").innerText;
+
+    document.getElementById("finalAccuracy").innerText =
+    document.getElementById("accuracy").innerText;
+}{
+    clearInterval(timerInterval);
+
+    document.getElementById("typingBox").disabled = true;
+
+    document.getElementById("finalResult").style.display =
+    "block";
+
+    document.getElementById("finalTime").innerText =
+    document.getElementById("time").innerText;
+
+    document.getElementById("finalSpeed").innerText =
+    document.getElementById("speed").innerText;
+
+    document.getElementById("finalAccuracy").innerText =
+    document.getElementById("accuracy").innerText;
+}{  ab theek hai?
+ho gaya theek
+ab isme aisa karo ki test stop hone ke baad enter dabane par dobara test start ho jaye
+naya paragraph kese aayega
+document.addEventListener(
+"keydown",
+function(event){
+
+    if(event.key === "Enter" && !started
+
+    ){
+        
+
+        event.preventDefault();
+
+        document.getElementById("typingBox").value = "";
+
+        document.getElementById("finalResult").style.display =
+        "none";
+
+        startTest();
+        location.reload();
+    }
+}
+); kya ye sahi hai
+document....... wala code kaha add karu
+paragraph same aa raha hai bar bar
+har bar same paragraph aa raha hai
+is code ko aisa kar do ki new random test button ke neeche change paragraph ka butto aaye or us par click karte hi paragraph change ho jaye
+bana do
+paragraph ke beech me enter marne se bhi test reset ho jata hai
+if(
+    typedText.length >= paragraph.length &&
+    typedText === paragraph
+){
+let testfinishef = false;
+    clearInterval(timerInterval);
+
+    document.getElementById("typingBox").disabled = true;
+
+    document.getElementById("finalResult").style.display =
+    "block";
+
+    document.getElementById("finalTime").innerText =
+    document.getElementById("time").innerText;
+
+    document.getElementById("finalSpeed").innerText =
+    document.getElementById("speed").innerText;
+
+    document.getElementById("finalAccuracy").innerText =
+    document.getElementById("accuracy").innerText;
+
+    started = false;
+    testfinished = true;
+}
+} kya ye sahi hai
+bhai bhai kuchh nahi hua
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<title>Typing Speed Test</title>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+    {% if user %}
+        <a href="/logout">Logout</a>
+    {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    {% endif %}
+
+</div>
+
+ 
+
+<div class="container">
+
+<div class="left">
+ {% if user %}
+<div class="welcome-bar">
+    Welcome {{ user }}
+</div>
+{% endif %}
+<h1>Typing Speed Test</h1>
+
+
+<div class="paragraph" id="paragraph"></div>
+
+<div class="info">
+Press ENTER to Start Test
+</div>
+
+<textarea
+id="typingBox"
+placeholder="Press ENTER to Start..."
+disabled
+></textarea>
+
+<div id="finalResult">
+
+<h2>Test Completed</h2>
+
+<h3>Time: <span id="finalTime"></span></h3>
+
+<h3>Speed: <span id="finalSpeed"></span></h3>
+
+<h3>Accuracy: <span id="finalAccuracy"></span></h3>
+
+<button id="restartBtn" onclick="location.reload()">
+New Random Test
+</button>
+
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="card">
+<h2>Time</h2>
+<div class="value" id="time">0s</div>
+</div>
+
+<div class="card">
+<h2>Speed</h2>
+<div class="value" id="speed">0 WPM</div>
+</div>
+
+<div class="card">
+<h2>Accuracy</h2>
+<div class="value" id="accuracy">0%</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let startTime;
+let timerInterval;
+let started = false;
+let testfinished = false;
+
+const paragraph = {{ paragraph }};
+
+const paragraphDiv =
+document.getElementById("paragraph");
+
+const originalWords =
+paragraph.trim().split(/\\s+/);
+
+paragraphDiv.innerHTML =
+paragraph.split("").map(char => {
+    return <span class="char">${char}</span>;
+}).join("");
+
+function startTest(){
+
+started = true;
+
+document.getElementById("typingBox").disabled = false;
+
+document.getElementById("typingBox").focus();
+
+startTime = new Date().getTime();
+
+timerInterval = setInterval(updateStats,100);
+}
+
+function updateStats(){
+
+let typedText =
+document.getElementById("typingBox").value;
+
+let currentTime =
+new Date().getTime();
+
+let timeTaken =
+(currentTime - startTime)/1000;
+document.getElementById("time").innerText =
+timeTaken.toFixed(1) + "s";
+
+let typedWords =
+typedText.trim().split(/\s+/);
+
+if(typedText.trim() == ""){
+typedWords = [];
+}
+    let correctChars = 0;
+
+    for(let i=0;i<typedText.length;i++){
+        if(typedText[i] === paragraph[i]){
+            correctChars++;
+        }
+    }
+
+let accuracy = 0;
+
+if(typedText.length > 0){
+
+    accuracy = Math.round(
+        (correctChars / typedText.length) * 100
+    );
+}
+document.getElementById("accuracy").innerText =
+    accuracy + "%";
+
+
+let wpm =
+(
+    ((correctChars / 5) / timeTaken) * 60
+);
+
+if(!isFinite(wpm)){
+    wpm = 0;
+}
+
+document.getElementById("speed").innerText =
+wpm.toFixed(2) + " WPM";
+
+let chars =
+document.querySelectorAll(".char");
+
+for(let i=0;i<chars.length;i++){
+
+    chars[i].classList.remove(
+        "correct-char",
+        "wrong-char",
+        "current-char"
+    );
+}
+
+for(let i=0;i<typedText.length;i++){
+
+    if(i >= chars.length) break;
+
+    if(typedText[i] === paragraph[i]){
+
+        chars[i].classList.add(
+            "correct-char"
+        );
+    }
+    else{
+
+        chars[i].classList.add(
+            "wrong-char"
+        );
+    }
+}
+
+if(typedText.length < chars.length){
+
+    chars[typedText.length]
+        .classList.add(
+            "current-char"
+        );
+}
+let correctWords = 0;
+
+for(let i=0;i<typedWords.length;i++){
+
+if(
+typedWords[i] === originalWords[i]
+){
+correctWords++;
+}
+}
+
+
+document.getElementById("accuracy").innerText =
+accuracy + "%";
+
+if(
+    typedText.length >= paragraph.length &&
+    typedText === paragraph
+){
+
+    clearInterval(timerInterval);
+
+    document.getElementById("typingBox").disabled = true;
+
+    document.getElementById("finalResult").style.display =
+    "block";
+
+    document.getElementById("finalTime").innerText =
+    document.getElementById("time").innerText;
+
+    document.getElementById("finalSpeed").innerText =
+    document.getElementById("speed").innerText;
+
+    document.getElementById("finalAccuracy").innerText =
+    document.getElementById("accuracy").innerText;
+
+    started = false;
+    testfinished = true;
+}
+}
+   
+
+
+document.addEventListener(
+"keydown",
+function(event){
+
+    if(event.key === "Enter" && !started
+
+    ){
+        
+
+        event.preventDefault();
+
+        document.getElementById("typingBox").value = "";
+
+        document.getElementById("finalResult").style.display =
+        "none";
+
+        startTest();
+      
+    }
+}
+);
+
+document.getElementById("typingBox").addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Enter"){
+            event.preventDefault();
+            location.reload();
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+
+  ye hai sara code
+paragraph kyu change nahi ho raha hai
+@app.route("/")
+def home():
+
+    if "current_paragraph" not in session:
+        session["current_paragraph"] = random.choice(paragraphs)
+
+    user = session.get("user")
+
+    return render_template(
+        "index.html",
+        paragraph=session["current_paragraph"],
+        user=user
+    )
+@app.route("/change-paragraph")
+def change_paragraph():
+
+    session["current_paragraph"] = random.choice(paragraphs)
+
+    return redirect("/")
+
+home route ka sahi code bhejo
+ye jaga add karne hai
+location.reload kaha hai
+def home():
+
+    if "current_paragraph" not in session:
+        session["current_paragraph"] = random.choice(paragraphs)
+
+    user = session.get("user")
+
+    return render_template(
+        "index.html",
+        paragraph=session["current_paragraph"],
+        user=user
+    )
+
+document.addEventListener(
+"keydown",
+function(event){
+
+    if(event.key === "Enter" && testfinished){
+
+        event.preventDefault();
+
+        window.location.href = "/change-paragraph";
+    }
+}
+); isem error hai
+end me ye hai document.addEventListener(
+"keydown",
+function(event){
+
+    if(event.key === "Enter"){
+
+        event.preventDefault();
+
+        if(testfinished){
+            location.reload();
+        }
+        else if(!started){
+            startTest();
+        }
+    }
+}
+);
+
+document.getElementById("typingBox").addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Enter"){
+            event.preventDefault();
+        }
+
+    }
+);
+ab mujhe 30 paragaraph do 4-5 line ke or unme se kuchh 6-7 line ke kuchh simple english or kuchh middle
+list kaha hai
+is game ko chrome par publish kese karu
+kar do
+requirements.txt me kya karu
+aisa dikh raha hai
+pehle ye batao ki password ko hases e kese save karu
+ky dono code kaha likhne hai
+ab batao vs code me kon si command run karu
+git init
+git add .
+git commit -m "Typing Test Website"
+git branch -M main
+git remote add origin YOUR_REPO_URL
+git push -u origin main iska kya karna hai
+git install kese karu
+git version 2.54.0.windows.1
+ye sari command one by one run karni hai
+last command run karne ke bad kya hoga
+last command run karne par ye khula hai browser me
+ab kya karu
+....Counting objects: 100% (14/14), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (12/12), done.
+Writing objects: 100% (14/14), 7.54 KiB | 1.08 MiB/s, done.
+Total 14 (delta 2), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (2/2), done.
+To https://github.com/singhhansraj87544/typing-test.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+PS D:\my data\Documents\Typing-test> 
+repositories select karne ke bad install ka button aa raha hai
+region or root directory me kya bharna hai
+instance type me kya bharu
+environment variables me kya bharu
+deploy web service par click kar diya ab kya hoga
+your service is live likha aa gaya hai
+ye batao or log ise kese use kar sakte hai
+ha website khul gayi
+kya typing test search karne se nahi aayegi
+kitne time me sleep mode me chali jati hai website
+ise sleep mode se kese nikale
+kese pata chalega ki kitne visitors aa chuke hai ab tak
+google analytics kese use kare
+currency kya bharu
+business details me category kya bharu
+business objective kya bharu
+more than one objective, but a maximum of two is recommended.
+
+Generate leads
+Measure actions that indicate potential customers, such as completing contact form or requesting a quote
+
+
+Drive sales
+Analyze and optimize sales and any financial transactions on your website or app
+
+
+Understand web and/or app traffic
+Measure your website or app visitors and the channels that drive their visits
+
+
+View user engagement & retention
+Learn how people explore the products or services on your website or app
+
+
+Other business objectives
+If your business is in a category not listed abov ye option hai
+ab chose a plateform likha aa raha hai
+ab e aa raha hai
+ab creat par click kar du?
+Data collection isn't active for your website. If you installed tags more than 48 hours ago, make sure they are set up correctly. ye kya hai
+G-57L4LZK0K3
+website kholne ke bad kya karu
+isse revenue kese aata hai
+is game me ek start test button bana do jise dabane par test start ho jay or baki sab same rehna chahiye
+isk css bhi do
+ise rendr me update karbe ke liye kon si command run karu
+ab ye batao meri website chrome par search me kese aayegi
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-57L4LZK0K3"></script>
 <script>

@@ -220,15 +220,16 @@ def home():
         paragraph=session["current_paragraph"],
         user=user
     )
+import os
 from flask import send_from_directory
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return send_from_directory(".", "sitemap.xml")
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "sitemap.xml")
 
 @app.route("/robots.txt")
 def robots():
-    return send_from_directory(".", "robots.txt")   
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "robots.txt") 
 
 if __name__ == "__main__":
     app.run(debug=True)

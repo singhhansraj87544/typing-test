@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://typing-test-dmma.onrender.com/sitemap.xml

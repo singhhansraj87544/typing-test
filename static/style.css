@@ -184,6 +184,73 @@ textarea{
     font-weight:bold;
 }
 
+/* Leaderboard */
+
+.leaderboard-container{
+    width:90%;
+    max-width:800px;
+    margin:40px auto;
+    text-align:center;
+}
+
+.leaderboard-title{
+    font-size:36px;
+    margin-bottom:25px;
+}
+
+.leaderboard-table{
+    width:100%;
+    border-collapse:collapse;
+    background:#1e1e1e;
+    overflow:hidden;
+    border-radius:10px;
+}
+
+.leaderboard-table th{
+    background:#00b894;
+    color:white;
+    padding:15px;
+}
+
+.leaderboard-table td{
+    padding:12px;
+    border-bottom:1px solid #333;
+}
+
+.leaderboard-table tr:hover{
+    background:#2c2c2c;
+}
+
+.gold{
+    color:gold;
+    font-weight:bold;
+}
+
+.silver{
+    color:silver;
+    font-weight:bold;
+}
+
+.bronze{
+    color:#cd7f32;
+    font-weight:bold;
+}
+
+.back-btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:10px 20px;
+    background:#00b894;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+    transition:0.3s;
+}
+
+.back-btn:hover{
+    background:#009d7f;
+}
+
 #finalResult{
     display:none;
     margin-top:20px;

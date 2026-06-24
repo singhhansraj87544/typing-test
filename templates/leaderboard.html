@@ -1,28 +1,164 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Leaderboard</title>
+    <title>🏆 Leaderboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+
+        body{
+            background:#0f172a;
+            color:white;
+            font-family:Arial,sans-serif;
+            margin:0;
+            padding:0;
+        }
+
+        .leaderboard-container{
+            width:90%;
+            max-width:900px;
+            margin:40px auto;
+            text-align:center;
+        }
+
+        .leaderboard-title{
+            font-size:50px;
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+            color:#94a3b8;
+            margin-bottom:30px;
+        }
+
+        .leaderboard-box{
+            background:#1e293b;
+            border-radius:15px;
+            overflow:hidden;
+            box-shadow:0 0 20px rgba(0,255,150,.2);
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th{
+            background:#10b981;
+            padding:18px;
+            font-size:18px;
+        }
+
+        td{
+            padding:16px;
+            border-bottom:1px solid #334155;
+            font-size:17px;
+        }
+
+        tr:hover{
+            background:#273449;
+        }
+
+        .gold{
+            color:gold;
+            font-weight:bold;
+        }
+
+        .silver{
+            color:silver;
+            font-weight:bold;
+        }
+
+        .bronze{
+            color:#cd7f32;
+            font-weight:bold;
+        }
+
+        .wpm{
+            color:#10b981;
+            font-weight:bold;
+        }
+
+        .back-btn{
+            display:inline-block;
+            margin-top:25px;
+            padding:12px 25px;
+            background:#10b981;
+            color:white;
+            text-decoration:none;
+            border-radius:10px;
+            font-weight:bold;
+        }
+
+        .back-btn:hover{
+            background:#059669;
+        }
+
+    </style>
 </head>
+
 <body>
 
-<h1>🏆 Leaderboard</h1>
+<div class="leaderboard-container">
 
-<table border="1">
-<tr>
-    <th>Rank</th>
-    <th>User</th>
-    <th>Best WPM</th>
-</tr>
+    <h1 class="leaderboard-title">🏆 Leaderboard</h1>
 
-{% for score in scores %}
-<tr>
-    <td>{{ loop.index }}</td>
-    <td>{{ score[0] }}</td>
-    <td>{{ score[1] }}</td>
-</tr>
-{% endfor %}
+    <p class="subtitle">
+        Top Typists Ranked By Best WPM
+    </p>
 
-</table>
+    <div class="leaderboard-box">
+
+        <table>
+
+            <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Best WPM</th>
+            </tr>
+
+            {% for score in scores %}
+
+            <tr>
+
+                <td>
+
+                    {% if loop.index == 1 %}
+                        <span class="gold">🥇 #1</span>
+
+                    {% elif loop.index == 2 %}
+                        <span class="silver">🥈 #2</span>
+
+                    {% elif loop.index == 3 %}
+                        <span class="bronze">🥉 #3</span>
+
+                    {% else %}
+                        #{{ loop.index }}
+                    {% endif %}
+
+                </td>
+
+                <td>{{ score[0] }}</td>
+
+                <td class="wpm">
+                    {{ score[1] }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+    <a href="/" class="back-btn">
+        ⬅ Back To Test
+    </a>
+
+</div>
 
 </body>
 </html>

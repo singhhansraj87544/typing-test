@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaderboard</title>
+</head>
+<body>
+
+<h1>🏆 Leaderboard</h1>
+
+<table border="1">
+<tr>
+    <th>Rank</th>
+    <th>User</th>
+    <th>Best WPM</th>
+</tr>
+
+{% for score in scores %}
+<tr>
+    <td>{{ loop.index }}</td>
+    <td>{{ score[0] }}</td>
+    <td>{{ score[1] }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</body>
+</html>

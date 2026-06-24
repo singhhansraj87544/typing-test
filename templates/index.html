@@ -95,6 +95,19 @@
 {% endif %}
 <h1>Typing Speed Test</h1>
 
+<div class="top-bar">
+
+    <span>Welcome, {{ user }}</span>
+
+    <a href="/leaderboard">
+        <button>🏆 Leaderboard</button>
+    </a>
+
+    <a href="/logout">
+        <button>Logout</button>
+    </a>
+
+</div>
 
 <div class="paragraph" id="paragraph"></div>
 
@@ -315,6 +328,18 @@ if(
 ){
 
     clearInterval(timerInterval);
+
+    let finalWpm = parseFloat(wpm.toFixed(2));
+
+    fetch("/save-score", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            wpm: finalWpm
+        })
+    });
 
     document.getElementById("typingBox").disabled = true;
 

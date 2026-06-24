@@ -86,33 +86,46 @@ def init_db():
 init_db()
 @app.route("/save-score", methods=["POST"])
 def save_score():
+    try:
+        print("SAVE SCORE ROUTE HIT")
 
-    if "user" not in session:
-        return "Login Required"
+        if "user" not in session:
+            return "Login Required"
 
-    data = request.get_json()
-    wpm = float(data["wpm"])
+        data = request.get_json()
+        print(data)
 
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
+        wpm = float(data["wpm"])
 
-    cursor.execute(
-        "SELECT best_wpm FROM users WHERE username=?",
-        (session["user"],)
-    )
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
 
-    current = cursor.fetchone()[0]
-
-    if wpm > current:
         cursor.execute(
-            "UPDATE users SET best_wpm=? WHERE username=?",
-            (wpm, session["user"])
-        )
-        conn.commit()
+    "SELECT best_wpm FROM users WHERE username=?",
+    (session["user"],)
+)
 
-    conn.close()
+        result = cursor.fetchone()
 
-    return "OK"
+        if result is None:
+            return "User not found"
+
+        current = result[0] or 0
+
+        if wpm > current:
+            cursor.execute(
+                "UPDATE users SET best_wpm=? WHERE username=?",
+                (wpm, session["user"])
+            )
+            conn.commit()
+
+        conn.close()
+
+        return "OK"
+
+    except Exception as e:
+        print("ERROR:", e)
+        return str(e), 500
 #--------------------------LEADERBOARD-----------------------
 @app.route("/leaderboard")
 def leaderboard():

@@ -72,78 +72,20 @@ paragraphs = [
 def init_db():
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
-            password TEXT
+            password TEXT,
+            best_wpm REAL DEFAULT 0
         )
     """)
+
     conn.commit()
     conn.close()
 
-#------------------SAVE SCORE------------------------
-init_db()
-@app.route("/save-score", methods=["POST"])
-def save_score():
-    try:
-        print("SAVE SCORE ROUTE HIT")
 
-        if "user" not in session:
-            return "Login Required"
-
-        data = request.get_json()
-        print(data)
-
-        wpm = float(data["wpm"])
-
-        conn = sqlite3.connect("users.db")
-        cursor = conn.cursor()
-
-        cursor.execute(
-    "SELECT best_wpm FROM users WHERE username=?",
-    (session["user"],)
-)
-
-        result = cursor.fetchone()
-
-        if result is None:
-            return "User not found"
-
-        current = result[0] or 0
-
-        if wpm > current:
-            cursor.execute(
-                "UPDATE users SET best_wpm=? WHERE username=?",
-                (wpm, session["user"])
-            )
-            conn.commit()
-
-        conn.close()
-
-        return "OK"
-
-    except Exception as e:
-        print("ERROR:", e)
-        return str(e), 500
-#--------------------------LEADERBOARD-----------------------
-@app.route("/leaderboard")
-def leaderboard():
-
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT username, best_wpm
-        FROM users
-        ORDER BY best_wpm DESC
-        LIMIT 20
-    """)
-
-    scores = cursor.fetchall()
-    conn.close()
-
-    return render_template("leaderboard.html", scores=scores)
 
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET","POST"])

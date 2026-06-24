@@ -113,6 +113,25 @@ def save_score():
     conn.close()
 
     return "OK"
+#--------------------------LEADERBOARD-----------------------
+@app.route("/leaderboard")
+def leaderboard():
+
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT username, best_wpm
+        FROM users
+        ORDER BY best_wpm DESC
+        LIMIT 20
+    """)
+
+    scores = cursor.fetchall()
+    conn.close()
+
+    return render_template("leaderboard.html", scores=scores)
+
 # ---------------- REGISTER ----------------
 @app.route("/register", methods=["GET","POST"])
 def register():

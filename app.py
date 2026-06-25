@@ -71,15 +71,11 @@ paragraphs = [
 # ---------------- DATABASE ----------------
 def init_db():
     conn = sqlite3.connect("users.db")
-    c = conn.cursor()
+    cursor = conn.cursor()
 
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS users(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT,
-            best_wpm REAL DEFAULT 0
-        )
+    cursor.execute("""
+    ALTER TABLE users
+    ADD COLUMN best_wpm REAL DEFAULT 0
     """)
 
     conn.commit()

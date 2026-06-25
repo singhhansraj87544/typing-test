@@ -99,7 +99,12 @@ def save_score():
         (session["user"],)
     )
 
-    current = cursor.fetchone()[0]
+    result = cursor.fetchone()
+
+    if result is None:
+        return "User not found"
+
+    current = result[0] or 0
 
     if wpm > current:
         cursor.execute(
@@ -151,6 +156,7 @@ def register():
             c.execute("INSERT INTO users(username,password) VALUES(?,?)",
                       (username, hashed_password))
             conn.commit()
+           
         except:
             return "User already exists!"
 
@@ -159,6 +165,7 @@ def register():
 
     return render_template("register.html")
     print("Registered:", username, password)
+    print("REFISTERED:", username)
 
 # --------------------change paragraph-------------------
 @app.route("/change-paragraph")

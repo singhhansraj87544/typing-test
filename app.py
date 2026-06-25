@@ -84,6 +84,28 @@ def init_db():
 
     conn.commit()
     conn.close()
+# ----------------------leaderboard--------------------
+@app.route("/leaderboard")
+def leaderboard():
+
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT username, best_wpm
+        FROM users
+        ORDER BY best_wpm DESC
+        LIMIT 20
+    """)
+
+    scores = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        "leaderboard.html",
+        scores=scores
+    )
 
 
 

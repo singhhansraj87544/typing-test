@@ -330,7 +330,17 @@ if(
 
     let finalWpm = parseFloat(wpm.toFixed(2));
 
+    fetch("/save-score", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            wpm: finalWpm
+        })
+    });
 
+}
     document.getElementById("typingBox").disabled = true;
 
     document.getElementById("finalResult").style.display =
@@ -348,7 +358,7 @@ if(
     started = false;
     testfinished = true;
 }
-}
+
    
 
 

@@ -80,6 +80,38 @@ def init_db():
 
     conn.commit()
     conn.close()
+# --------------------save score-----------------
+from flask import request
+
+@app.route("/save-score", methods=["POST"])
+def save_score():
+
+    if "user" not in session:
+        return "Login required"
+
+    data = request.get_json()
+    wpm = float(data["wpm"])
+
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT best_wpm FROM users WHERE username=?",
+        (session["user"],)
+    )
+
+    current = cursor.fetchone()[0]
+
+    if wpm > current:
+        cursor.execute(
+            "UPDATE users SET best_wpm=? WHERE username=?",
+            (wpm, session["user"])
+        )
+        conn.commit()
+
+    conn.close()
+
+    return "OK"
 # ----------------------leaderboard--------------------
 @app.route("/leaderboard")
 def leaderboard():

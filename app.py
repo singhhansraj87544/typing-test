@@ -81,7 +81,6 @@ def init_db():
     conn.commit()
     conn.close()
 # --------------------save score-----------------
-from flask import request
 
 @app.route("/save-score", methods=["POST"])
 def save_score():
